@@ -4,7 +4,7 @@
   "type": "module",
   "main": "lba.mjs",
   "scripts": {
-    "test": "node --test lba.test.mjs evidence.test.mjs dsar.test.mjs"
+    "test": "node --test lba.test.mjs evidence.test.mjs dsar.test.mjs precedents.test.mjs"
   },
   "license": "MIT"
 }

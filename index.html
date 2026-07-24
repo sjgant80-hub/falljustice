@@ -164,6 +164,13 @@ footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;fon
       <div id="exhibits"></div>
     </div>
 
+    <!-- CASE LAW -->
+    <div class="card">
+      <h3>Case law &amp; Magna Carta <span class="pill">verified · sourced</span></h3>
+      <div id="mc-reality" class="scope"></div>
+      <div id="precedents"></div>
+    </div>
+
     <div class="card">
       <button class="ghost" onclick="exportVault()">Export encrypted backup</button>
       <button class="danger" onclick="lockVault()">Lock</button>
@@ -183,6 +190,7 @@ footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;fon
 <script type="module">
 import { assembleLBA, detectPseudoLaw, smallClaimsBand, SCOPE_NOTICE } from './lba.mjs';
 import { buildDSAR, deadlineTracker, escalation } from './dsar.mjs';
+import { ACCESS_TO_JUSTICE, STATUTORY_WEAVES, magnaCartaReality } from './precedents.mjs';
 import { EvidenceVault } from './evidence.mjs';
 import { Vault } from './vault.mjs';
 import { idbAvailable, openIdbAdapter } from './idb-adapter.mjs';
@@ -205,8 +213,35 @@ window.unlock = async function () {
     document.getElementById('app').classList.remove('hidden');
     if (!adapter) note(s, 'warn', 'No persistent storage here — your vault lasts this session only. Export a backup before you leave.');
     renderExhibits();
+    renderPrecedents();
   } catch (e) { note(s, 'err', e.message); }
 };
+
+// Data-driven from the VERIFIED corpus in precedents.mjs — every citation shows its source link, so a
+// reader can check it. As the corpus grows, this panel grows with no HTML change.
+function renderPrecedents() {
+  const mc = magnaCartaReality();
+  document.getElementById('mc-reality').innerHTML =
+    `<strong>Magna Carta, honestly:</strong> only clauses ${mc.inForce.map(esc).join(', ')} remain in force. ` +
+    `The winning use is the right of access to justice — ${esc(mc.theWinningUse)} ` +
+    `<br><strong style="color:var(--gold)">The losing use:</strong> ${esc(mc.theLosingUse)} ` +
+    `<a href="${esc(mc.source)}" target="_blank" rel="noopener" style="color:var(--accent2)">[source]</a>`;
+  let h = '<table><thead><tr><th>Case</th><th>Citation</th><th>Why it won / when to use</th></tr></thead><tbody>';
+  for (const c of ACCESS_TO_JUSTICE) {
+    h += `<tr><td>${esc(c.name)}</td><td>${esc(c.citation)}<br><span style="color:var(--green);font-size:.7rem">WON</span></td>` +
+      `<td>${esc(c.principle)}<br><em style="color:var(--dim)">${esc(c.whenToUse)}</em> ` +
+      `<a href="${esc(c.source)}" target="_blank" rel="noopener" style="color:var(--accent2)">[verify]</a></td></tr>`;
+  }
+  h += '</tbody></table>';
+  h += '<h3 style="margin-top:.9rem">Weaving statutes together</h3>';
+  for (const w of STATUTORY_WEAVES) {
+    h += `<p style="font-size:.82rem;font-family:system-ui,sans-serif;margin-top:.4rem"><strong>${esc(w.name)}</strong> — ${esc(w.facts)}<br>` +
+      w.stack.map(s => '• ' + esc(s)).join('<br>') +
+      `<br><em style="color:var(--dim)">Why it works: ${esc(w.whyItWorks)}</em> ` +
+      `<a href="${esc(w.source)}" target="_blank" rel="noopener" style="color:var(--accent2)">[source]</a></p>`;
+  }
+  document.getElementById('precedents').innerHTML = h;
+}
 window.lockVault = function () { vault = evidence = null; location.reload(); };
 
 window.structureStory = async function () {
