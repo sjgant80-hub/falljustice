@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FallJustice · Clause 40 — Letter Before Action</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0c0d12;--surface:#15161f;--surface2:#1c1e2a;--border:#2a2c3a;--text:#e6e7ee;--dim:#9296a6;--accent:#c9a227;--accent2:#6c8cff;--green:#4caf50;--red:#e05a4d;--gold:#f0c040;font-family:Georgia,'Times New Roman',serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:1rem;display:flex;flex-direction:column;align-items:center}
+.wrap{width:100%;max-width:44rem}
+h1{font-size:1.6rem;letter-spacing:.02em}
+.sub{color:var(--dim);font-size:.9rem;margin-bottom:.25rem;font-family:system-ui,sans-serif}
+.crest{color:var(--accent);font-size:.8rem;font-family:system-ui,sans-serif;letter-spacing:.15em;text-transform:uppercase;margin-bottom:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:.5rem;padding:1.1rem;margin-bottom:1rem}
+.card h3{font-family:system-ui,sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:.7rem}
+label{display:block;font-size:.78rem;color:var(--dim);margin:.5rem 0 .25rem;font-family:system-ui,sans-serif}
+input,select,textarea{width:100%;padding:.55rem;background:var(--bg);border:1px solid var(--border);border-radius:.35rem;color:var(--text);font-size:.92rem;font-family:system-ui,sans-serif}
+textarea{min-height:5rem;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent2)}
+button{padding:.55rem 1rem;background:var(--accent2);color:#fff;border:none;border-radius:.35rem;cursor:pointer;font-size:.85rem;font-family:system-ui,sans-serif;margin:.35rem .35rem 0 0}
+button:hover{opacity:.9}
+button.gold{background:var(--accent);color:#1a1400}
+button.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+button.danger{background:var(--red)}
+.row{display:flex;gap:.6rem}.row>div{flex:1}
+.status{padding:.5rem .6rem;border-radius:.35rem;font-size:.82rem;margin-top:.5rem;font-family:system-ui,sans-serif}
+.status.ok{background:#16281a;color:var(--green)}.status.err{background:#2a1614;color:var(--red)}.status.warn{background:#2a2410;color:var(--gold)}
+.letter{white-space:pre-wrap;background:#faf8f2;color:#1a1a1a;padding:1.4rem;border-radius:.35rem;font-family:'Times New Roman',Georgia,serif;font-size:.95rem;line-height:1.5;margin-top:.6rem}
+.scope{font-size:.76rem;color:var(--dim);font-family:system-ui,sans-serif;line-height:1.5;border-left:2px solid var(--accent);padding-left:.6rem;margin-top:.5rem}
+table{width:100%;border-collapse:collapse;font-size:.8rem;font-family:system-ui,sans-serif;margin-top:.5rem}
+th,td{padding:.35rem .4rem;border-bottom:1px solid var(--border);text-align:left}
+th{color:var(--dim);font-size:.7rem;text-transform:uppercase}
+.hidden{display:none}
+.pill{display:inline-block;font-size:.7rem;font-family:system-ui,sans-serif;padding:.1rem .45rem;border-radius:1rem;background:var(--surface2);color:var(--dim);margin-left:.4rem}
+footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;font-family:system-ui,sans-serif;line-height:1.6;padding:1rem;max-width:44rem}
+.drop{border:2px dashed var(--border);border-radius:.4rem;padding:1.2rem;text-align:center;color:var(--dim);cursor:pointer;font-family:system-ui,sans-serif;font-size:.82rem}
+.drop.over{border-color:var(--accent2);color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crest">⚖ Clause 40 · to no one will we delay or deny justice</div>
+  <h1>FallJustice</h1>
+  <p class="sub">Draft a Letter Before Action, on the correct modern statute, on your own machine.</p>
+
+  <!-- UNLOCK -->
+  <div id="unlock" class="card">
+    <h3>Unlock your case vault</h3>
+    <p class="scope">Your evidence and letters are encrypted on this device with a master seed only you
+      hold. Nothing is uploaded. There is no recovery if you forget the seed, so store it safely.</p>
+    <label>Master seed</label>
+    <input type="password" id="seed" placeholder="a passphrase (min 8 characters)" autocomplete="off">
+    <button class="gold" onclick="unlock()">Open vault</button>
+    <div id="unlock-status"></div>
+  </div>
+
+  <div id="app" class="hidden">
+    <!-- STORY -->
+    <div class="card">
+      <h3>1 · Your grievance <span class="pill" id="cascade-pill">cascade: checking…</span></h3>
+      <label>Tell it plainly — what happened, when, who, how much?</label>
+      <textarea id="story" placeholder="e.g. On 2 March I bought a £450 laptop from MegaCorp. It overheats and shuts down within minutes. They refuse a refund."></textarea>
+      <button class="ghost" onclick="structureStory()">Structure my story ↴</button>
+      <span class="scope" style="border:none;display:inline;padding:0">The optional local assistant only reshapes <em>your</em> words into the form below — it never sources the law.</span>
+      <div id="story-status"></div>
+    </div>
+
+    <!-- FORM -->
+    <div class="card">
+      <h3>2 · The claim</h3>
+      <label>Type of dispute</label>
+      <select id="claimType">
+        <option value="goods_faulty">Faulty or not-as-described goods (Consumer Rights Act 2015)</option>
+        <option value="service_poor">Poor or unfinished service (Consumer Rights Act 2015)</option>
+        <option value="contract_breach">Breach of contract / money owed to you</option>
+        <option value="distance_cancel">Online purchase — right to cancel (Consumer Contracts Regs 2013)</option>
+        <option value="data_breach">Misuse of your personal data (UK GDPR / DPA 2018)</option>
+      </select>
+      <div class="row">
+        <div><label>Your name</label><input id="yourName" placeholder="Jane Smith"></div>
+        <div><label>Their name</label><input id="theirName" placeholder="MegaCorp Ltd"></div>
+      </div>
+      <div class="row">
+        <div><label>Your address</label><input id="yourAddress" placeholder="1 High St, Anytown, AN1 1AA"></div>
+        <div><label>Their address</label><input id="theirAddress" placeholder="99 Corporate Rd, London"></div>
+      </div>
+      <div class="row">
+        <div><label>Item / service</label><input id="item" placeholder="laptop"></div>
+        <div><label>Amount in dispute (£)</label><input id="amount" type="number" placeholder="450"></div>
+      </div>
+      <label>What went wrong (plain facts)</label>
+      <textarea id="faultDesc" placeholder="it overheats and shuts down within minutes of starting up"></textarea>
+      <div class="row">
+        <div><label>Remedy you want</label><input id="remedy" placeholder="a full refund"></div>
+        <div><label>Date of letter</label><input id="dateOfIssue" placeholder="15 March 2026"></div>
+      </div>
+      <button class="gold" onclick="generate()">Generate Letter Before Action</button>
+      <div id="gen-status"></div>
+      <div id="band" class="scope hidden"></div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div id="output-card" class="card hidden">
+      <h3>3 · Your Letter Before Action</h3>
+      <div id="letter" class="letter"></div>
+      <button onclick="copyLetter()">Copy</button>
+      <button class="ghost" onclick="downloadLetter()">Download .txt</button>
+    </div>
+
+    <!-- EVIDENCE -->
+    <div class="card">
+      <h3>4 · Evidence vault <span class="pill">encrypted · hashed · chronological</span></h3>
+      <div class="drop" id="drop" onclick="document.getElementById('file').click()">Drop emails, screenshots, receipts here — or click to add</div>
+      <input type="file" id="file" class="hidden" multiple>
+      <div class="row" style="margin-top:.5rem">
+        <div><label>Or add a note</label><input id="noteTitle" placeholder="Refund refusal (phone call)"></div>
+        <div style="flex:0 0 9rem"><label>Date it happened</label><input id="noteWhen" placeholder="10/03/2026"></div>
+      </div>
+      <button class="ghost" onclick="addNote()">Add note as exhibit</button>
+      <div id="ev-status"></div>
+      <div id="exhibits"></div>
+    </div>
+
+    <div class="card">
+      <button class="ghost" onclick="exportVault()">Export encrypted backup</button>
+      <button class="danger" onclick="lockVault()">Lock</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  FallJustice · a self-help drafting tool, <strong>not legal advice and not a solicitor</strong>. It
+  gives no guarantee of any outcome — check every fact before you send. For complex or high-value
+  disputes, take advice from a solicitor or Citizens Advice (citizensadvice.org.uk).<br>
+  It will not write "sovereign citizen" / Freeman-on-the-Land arguments — those get real claims struck
+  out. It cites the real modern statute a court actually enforces.<br>
+  AES-GCM 256 · your device only · no cloud · no tracking.
+</footer>
+
+<script type="module">
+import { assembleLBA, detectPseudoLaw, smallClaimsBand, SCOPE_NOTICE } from './lba.mjs';
+import { EvidenceVault } from './evidence.mjs';
+import { Vault } from './vault.mjs';
+import { idbAvailable, openIdbAdapter } from './idb-adapter.mjs';
+
+let vault = null, evidence = null, lastLetter = '';
+
+// Optional local cascade hook: if a WebLLM/FallRelay bridge exposes window.fallCascade(prompt)->text,
+// we use it purely to reshape the user's prose. It never sources statutes. Absent → manual entry.
+const cascade = typeof window.fallCascade === 'function' ? window.fallCascade : null;
+document.getElementById('cascade-pill').textContent = cascade ? 'cascade: local model ready' : 'cascade: offline — type manually';
+
+window.unlock = async function () {
+  const seed = document.getElementById('seed').value;
+  const s = document.getElementById('unlock-status');
+  try {
+    let adapter = idbAvailable() ? await openIdbAdapter('falljustice-vault').catch(() => null) : null;
+    vault = await new Vault(adapter ? { adapter } : {}).open(seed);
+    evidence = new EvidenceVault(vault);
+    document.getElementById('unlock').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    if (!adapter) note(s, 'warn', 'No persistent storage here — your vault lasts this session only. Export a backup before you leave.');
+    renderExhibits();
+  } catch (e) { note(s, 'err', e.message); }
+};
+window.lockVault = function () { vault = evidence = null; location.reload(); };
+
+window.structureStory = async function () {
+  const story = document.getElementById('story').value.trim();
+  const s = document.getElementById('story-status');
+  if (!story) return note(s, 'warn', 'Write your story first.');
+  const scan = detectPseudoLaw(story);
+  if (scan.flagged) return note(s, 'err', scan.guidance);
+  if (!cascade) return note(s, 'warn', 'No local model connected — fill the fields below by hand.');
+  note(s, 'ok', 'Structuring… (local model)');
+  try {
+    const out = await cascade(
+      'Extract these fields from the complaint as JSON only: {item, amount, faultDesc, remedy}. ' +
+      'Do NOT invent laws or statutes. Complaint: ' + story);
+    const j = JSON.parse(out.slice(out.indexOf('{'), out.lastIndexOf('}') + 1));
+    if (j.item) document.getElementById('item').value = j.item;
+    if (j.amount) document.getElementById('amount').value = String(j.amount).replace(/[^0-9.]/g, '');
+    if (j.faultDesc) document.getElementById('faultDesc').value = j.faultDesc;
+    if (j.remedy) document.getElementById('remedy').value = j.remedy;
+    note(s, 'ok', 'Filled the form from your story — check every field before generating.');
+  } catch (e) { note(s, 'warn', 'Could not auto-structure — please fill the fields by hand.'); }
+};
+
+window.generate = function () {
+  const facts = ['claimType', 'yourName', 'theirName', 'yourAddress', 'theirAddress', 'item', 'amount', 'faultDesc', 'remedy', 'dateOfIssue']
+    .reduce((o, id) => (o[id] = document.getElementById(id).value, o), {});
+  facts.amount = Number(facts.amount) || 0;
+  const s = document.getElementById('gen-status');
+  const r = assembleLBA(facts);
+  if (!r.ok) return note(s, 'err', r.guidance || r.error);
+  lastLetter = r.letter;
+  document.getElementById('letter').textContent = r.letter;
+  document.getElementById('output-card').classList.remove('hidden');
+  note(s, 'ok', `Draft ready · ${r.meta.statutesCited} statute(s) cited · respond-by ${r.meta.responseDays} days`);
+  const band = smallClaimsBand(facts.amount);
+  const b = document.getElementById('band'); b.classList.remove('hidden'); b.textContent = band.note;
+  document.getElementById('output-card').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.copyLetter = function () { navigator.clipboard.writeText(lastLetter); };
+window.downloadLetter = function () { dl(lastLetter, 'letter-before-action.txt', 'text/plain'); };
+
+// ── evidence ──
+const drop = document.getElementById('drop');
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); [...e.dataTransfer.files].forEach(addFile); });
+document.getElementById('file').addEventListener('change', e => [...e.target.files].forEach(addFile));
+
+async function addFile(file) {
+  const b64 = await fileToB64(file);
+  await evidence.add({ when: new Date(file.lastModified).toISOString().slice(0, 10), title: file.name, content: b64, mime: file.type, source: 'file' });
+  note(document.getElementById('ev-status'), 'ok', `Added ${file.name} (hashed + encrypted).`);
+  renderExhibits();
+}
+window.addNote = async function () {
+  const title = document.getElementById('noteTitle').value.trim();
+  const when = document.getElementById('noteWhen').value.trim();
+  if (!title) return;
+  await evidence.add({ when, title, content: title + '|' + when, mime: 'text/note', source: 'note' });
+  document.getElementById('noteTitle').value = '';
+  renderExhibits();
+};
+async function renderExhibits() {
+  if (!evidence) return;
+  const bundle = await evidence.bundle();
+  const el = document.getElementById('exhibits');
+  if (!bundle.length) { el.innerHTML = '<p class="scope" style="border:none;padding:0">No exhibits yet.</p>'; return; }
+  let h = '<table><thead><tr><th>No.</th><th>Date</th><th>Description</th><th>Fingerprint</th></tr></thead><tbody>';
+  for (const e of bundle) h += `<tr><td>${esc(e.exhibitNo)}</td><td>${esc(e.when || '—')}</td><td>${esc(e.title)}</td><td>sha256:${esc((e.hash || '').slice(0, 12))}…</td></tr>`;
+  el.innerHTML = h + '</tbody></table>';
+}
+
+window.exportVault = async function () {
+  const blob = await vault.export();
+  dl(JSON.stringify(blob, null, 2), `falljustice-vault-${new Date().toISOString().slice(0, 10)}.json`, 'application/json');
+};
+
+// ── helpers ──
+function note(el, cls, msg) { el.className = 'status ' + cls; el.textContent = msg; }
+function dl(text, name, mime) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; a.click(); URL.revokeObjectURL(a.href); }
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+function fileToB64(file) { return new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(file); }); }
+</script>
+</body>
+</html>
