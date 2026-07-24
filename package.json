@@ -1,0 +1,10 @@
+{
+  "name": "falljustice",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lba.mjs",
+  "scripts": {
+    "test": "node --test test-lba.mjs test-evidence.mjs"
+  },
+  "license": "MIT"
+}
