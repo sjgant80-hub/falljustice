@@ -56,8 +56,15 @@ footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;fon
   </div>
 
   <div id="app" class="hidden">
+    <!-- MODE -->
+    <div class="card" style="display:flex;gap:.5rem;align-items:center">
+      <span class="scope" style="border:none;padding:0;flex:1">Choose your tool:</span>
+      <button id="mode-lba" class="gold" onclick="setMode('lba')">Letter Before Action</button>
+      <button id="mode-dsar" class="ghost" onclick="setMode('dsar')">Data Access Request</button>
+    </div>
+
     <!-- STORY -->
-    <div class="card">
+    <div class="card lba-only">
       <h3>1 · Your grievance <span class="pill" id="cascade-pill">cascade: checking…</span></h3>
       <label>Tell it plainly — what happened, when, who, how much?</label>
       <textarea id="story" placeholder="e.g. On 2 March I bought a £450 laptop from MegaCorp. It overheats and shuts down within minutes. They refuse a refund."></textarea>
@@ -67,7 +74,7 @@ footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;fon
     </div>
 
     <!-- FORM -->
-    <div class="card">
+    <div class="card lba-only">
       <h3>2 · The claim</h3>
       <label>Type of dispute</label>
       <select id="claimType">
@@ -100,9 +107,44 @@ footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;fon
       <div id="band" class="scope hidden"></div>
     </div>
 
+    <!-- DSAR -->
+    <div class="card dsar-only hidden">
+      <h3>Data Subject Access Request <span class="pill">UK GDPR Art.15</span></h3>
+      <p class="scope">Ask an organisation for a copy of the personal data it holds on you. They must
+        respond within one month, free for the first copy. This is your individual right — not a tool
+        to bombard anyone.</p>
+      <div class="row">
+        <div><label>Your name</label><input id="d_yourName" placeholder="Jane Smith"></div>
+        <div><label>Your email</label><input id="d_yourEmail" placeholder="jane@example.com"></div>
+      </div>
+      <label>Your address</label><input id="d_yourAddress" placeholder="1 High St, Anytown, AN1 1AA">
+      <div class="row">
+        <div><label>Organisation</label><input id="d_controllerName" placeholder="MegaCorp Ltd"></div>
+        <div><label>Their address / DPO</label><input id="d_controllerAddress" placeholder="Data Protection Officer, 99 Corp Rd"></div>
+      </div>
+      <label>How they can identify you (account no / email / customer ref)</label>
+      <input id="d_identifiers" placeholder="account 12345, jane@example.com">
+      <label>Anything specific you're after? (optional — you're entitled to all your data regardless)</label>
+      <input id="d_specificData" placeholder="call recordings and complaint notes from Jan–Mar 2026">
+      <div class="row">
+        <div><label>Date of letter</label><input id="d_dateOfIssue" placeholder="15 March 2026"></div>
+        <div><label>Response format</label><select id="d_format"><option value="electronically">Electronically</option><option value="by post">By post</option></select></div>
+      </div>
+      <button class="gold" onclick="generateDSAR()">Generate DSAR</button>
+      <div id="dsar-status"></div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0">
+      <h3>Deadline tracker</h3>
+      <div class="row">
+        <div><label>Date they received it (YYYY-MM-DD)</label><input id="d_received" placeholder="2026-03-15"></div>
+        <div style="flex:0 0 12rem"><label>&nbsp;</label><label style="display:flex;align-items:center;gap:.4rem;color:var(--text)"><input type="checkbox" id="d_extended" style="width:auto"> They claimed an extension</label></div>
+      </div>
+      <button class="ghost" onclick="trackDeadline()">Track deadline</button>
+      <div id="deadline-out" class="scope hidden"></div>
+    </div>
+
     <!-- OUTPUT -->
     <div id="output-card" class="card hidden">
-      <h3>3 · Your Letter Before Action</h3>
+      <h3 id="output-title">Your letter</h3>
       <div id="letter" class="letter"></div>
       <button onclick="copyLetter()">Copy</button>
       <button class="ghost" onclick="downloadLetter()">Download .txt</button>
@@ -140,6 +182,7 @@ footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;fon
 
 <script type="module">
 import { assembleLBA, detectPseudoLaw, smallClaimsBand, SCOPE_NOTICE } from './lba.mjs';
+import { buildDSAR, deadlineTracker, escalation } from './dsar.mjs';
 import { EvidenceVault } from './evidence.mjs';
 import { Vault } from './vault.mjs';
 import { idbAvailable, openIdbAdapter } from './idb-adapter.mjs';
@@ -204,7 +247,49 @@ window.generate = function () {
 };
 
 window.copyLetter = function () { navigator.clipboard.writeText(lastLetter); };
-window.downloadLetter = function () { dl(lastLetter, 'letter-before-action.txt', 'text/plain'); };
+window.downloadLetter = function () { dl(lastLetter, (window.__mode === 'dsar' ? 'data-access-request' : 'letter-before-action') + '.txt', 'text/plain'); };
+
+// ── mode + DSAR ──
+window.__mode = 'lba';
+window.setMode = function (m) {
+  window.__mode = m;
+  document.querySelectorAll('.lba-only').forEach(e => e.classList.toggle('hidden', m !== 'lba'));
+  document.querySelectorAll('.dsar-only').forEach(e => e.classList.toggle('hidden', m !== 'dsar'));
+  document.getElementById('mode-lba').className = m === 'lba' ? 'gold' : 'ghost';
+  document.getElementById('mode-dsar').className = m === 'dsar' ? 'gold' : 'ghost';
+  document.getElementById('output-card').classList.add('hidden');
+};
+
+window.generateDSAR = function () {
+  const facts = ['yourName', 'yourEmail', 'yourAddress', 'controllerName', 'controllerAddress', 'identifiers', 'specificData', 'dateOfIssue', 'format']
+    .reduce((o, id) => (o[id] = document.getElementById('d_' + id).value, o), {});
+  const s = document.getElementById('dsar-status');
+  const r = buildDSAR(facts);
+  if (!r.ok) return note(s, 'err', r.guidance || r.error);
+  lastLetter = r.letter;
+  document.getElementById('output-title').textContent = 'Your Data Subject Access Request';
+  document.getElementById('letter').textContent = r.letter;
+  document.getElementById('output-card').classList.remove('hidden');
+  note(s, 'ok', `Draft ready · ${r.meta.itemsRequested} Article 15 items · one-month deadline`);
+  document.getElementById('output-card').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.trackDeadline = function () {
+  const received = document.getElementById('d_received').value.trim();
+  const extended = document.getElementById('d_extended').checked;
+  const today = new Date().toISOString().slice(0, 10);
+  const t = deadlineTracker(received, { extended, today });
+  const out = document.getElementById('deadline-out');
+  out.classList.remove('hidden');
+  if (!t.ok) { out.textContent = t.error; return; }
+  const steps = escalation(t.status);
+  const target = extended ? t.extendedDueDate : t.dueDate;
+  out.innerHTML = `Response due <strong>${esc(target)}</strong> · ` +
+    (t.status === 'overdue' ? `<span style="color:var(--red)">OVERDUE by ${Math.abs(t.daysRemaining)} day(s)</span>`
+      : t.status === 'due-soon' ? `<span style="color:var(--gold)">${t.daysRemaining} day(s) left</span>`
+      : `<span style="color:var(--green)">${t.daysRemaining} day(s) left</span>`) +
+    (steps ? '<br>Next steps: ' + steps.map(esc).join(' → ') : '');
+};
 
 // ── evidence ──
 const drop = document.getElementById('drop');
