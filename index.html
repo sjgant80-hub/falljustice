@@ -190,7 +190,7 @@ footer{margin-top:1.5rem;font-size:.72rem;color:var(--dim);text-align:center;fon
 <script type="module">
 import { assembleLBA, detectPseudoLaw, smallClaimsBand, SCOPE_NOTICE } from './lba.mjs';
 import { buildDSAR, deadlineTracker, escalation } from './dsar.mjs';
-import { ACCESS_TO_JUSTICE, STATUTORY_WEAVES, magnaCartaReality } from './precedents.mjs';
+import { ACCESS_TO_JUSTICE, CONSUMER_CASES, LOSING_USES, STATUTORY_WEAVES, magnaCartaReality } from './precedents.mjs';
 import { EvidenceVault } from './evidence.mjs';
 import { Vault } from './vault.mjs';
 import { idbAvailable, openIdbAdapter } from './idb-adapter.mjs';
@@ -232,6 +232,12 @@ function renderPrecedents() {
       `<td>${esc(c.principle)}<br><em style="color:var(--dim)">${esc(c.whenToUse)}</em> ` +
       `<a href="${esc(c.source)}" target="_blank" rel="noopener" style="color:var(--accent2)">[verify]</a></td></tr>`;
   }
+  for (const c of CONSUMER_CASES) {
+    const won = /WON/.test(c.outcome);
+    h += `<tr><td>${esc(c.name)}</td><td>${esc(c.citation)}<br><span style="color:${won ? 'var(--green)' : 'var(--gold)'};font-size:.7rem">${won ? 'WON' : 'DOCTRINE'}</span></td>` +
+      `<td>${esc(c.principle)}<br><em style="color:var(--dim)">${esc(c.whenToUse)}</em> ` +
+      `<a href="${esc(c.source)}" target="_blank" rel="noopener" style="color:var(--accent2)">[verify]</a></td></tr>`;
+  }
   h += '</tbody></table>';
   h += '<h3 style="margin-top:.9rem">Weaving statutes together</h3>';
   for (const w of STATUTORY_WEAVES) {
@@ -239,6 +245,11 @@ function renderPrecedents() {
       w.stack.map(s => '• ' + esc(s)).join('<br>') +
       `<br><em style="color:var(--dim)">Why it works: ${esc(w.whyItWorks)}</em> ` +
       `<a href="${esc(w.source)}" target="_blank" rel="noopener" style="color:var(--accent2)">[source]</a></p>`;
+  }
+  h += '<h3 style="margin-top:.9rem;color:var(--gold)">⚠ Arguments that LOSE (do not use these)</h3>';
+  for (const c of LOSING_USES) {
+    h += `<p style="font-size:.82rem;font-family:system-ui,sans-serif;margin-top:.4rem"><strong>${esc(c.name)}</strong> ${esc(c.citation)} — ${esc(c.principle)} ` +
+      `<a href="${esc(c.source)}" target="_blank" rel="noopener" style="color:var(--accent2)">[verify]</a></p>`;
   }
   document.getElementById('precedents').innerHTML = h;
 }

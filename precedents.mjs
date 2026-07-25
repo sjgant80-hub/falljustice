@@ -8,12 +8,15 @@
 // impossible — if it isn't sourced, it isn't here.
 //
 // THE HONEST TRUTH ABOUT MAGNA CARTA (read magnaCartaReality() before you cite it):
-//   Only three clauses remain in force in England & Wales — clause 1 (part), clause 9 (City of London
-//   liberties), and clause 29 of the 1297 statute (the reissued combination of 1215's clauses 39 and
-//   40: due process + "to no one will we sell, deny or delay right or justice"). Magna Carta is almost
-//   never the WINNING argument on its own today. What wins is its descendant: the constitutional right
-//   of access to justice, which the courts DID uphold in the cases below. Quoting "clause 61 / lawful
-//   rebellion" (stripped out in 1215) is the sovereign-citizen error — it loses. Use the real line.
+//   The citable instrument is Magna Carta (1297), 1297 c. 9 (25 Edw 1) — the 1215 charter was
+//   papally annulled within months and is NOT on the statute roll, so never cite "Magna Carta 1215"
+//   as live law. Only three chapters of the 1297 statute remain in force in England & Wales: I
+//   (freedom of the Church), IX (liberties of the City of London), and XXIX (due process + access to
+//   justice — the reissued combination of the 1215 charter's clauses 39 and 40). Magna Carta is
+//   almost never the WINNING argument on its own today; what wins is its descendant, the
+//   constitutional right of access to justice (the cases below). Quoting "clause 61 / lawful
+//   rebellion" (removed in 1215, never statute) is the sovereign-citizen error — it loses in real
+//   courts (Samede, Kofa, AVI v MHVB below). Verified via the deep-research pass, 2026-07-25.
 // ════════════════════════════════════════════════════════════════
 
 // Tier A — the access-to-justice constitutional line (the real, winning descendant of Magna Carta).
@@ -62,12 +65,97 @@ export const ACCESS_TO_JUSTICE = [
     outcome: 'WON — the prison governor who blocked a prisoner’s court application was in contempt.',
     principle:
       'A person retains all civil rights not expressly taken away, including the basic right of ' +
-      'unimpeded access to the courts. Subordinate rules (there, a Prison Rule) cannot override that ' +
-      'right without express statutory authority.',
-    magnaCarta: 'the access-to-justice principle (Magna Carta descendant)',
+      'unimpeded access to the courts. Subordinate rules (there, s.47 Prison Act 1952) cannot ' +
+      'override that right without express statutory authority — Lord Wilberforce held the general ' +
+      'power "quite insufficient to authorise hindrance or interference with so basic a right".',
+    magnaCarta: 'the access-to-justice principle (Magna Carta descendant) — 3-0 adversarially verified',
     whenToUse:
       'When someone in authority is physically or procedurally obstructing you from reaching a court.',
-    source: 'https://www.casemine.com/judgement/uk/5a8ff8c960d03e7f57ecd6d2',
+    source: 'https://swarb.co.uk/raymond-v-honey-hl-4-mar-1981/',
+  },
+];
+
+// Tier B — substantive consumer WINS + the doctrine you argue with. Verified in the deep-research pass.
+export const CONSUMER_CASES = [
+  {
+    id: 'salt-stratstone-2015',
+    name: 'Salt v Stratstone Specialist Ltd',
+    citation: '[2015] EWCA Civ 745',
+    court: 'Court of Appeal (Civil Division)',
+    year: 2015,
+    outcome: 'WON — the buyer rescinded the sale and recovered the FULL £21,895 price (not just damages).',
+    principle:
+      'A "brand new" car was in fact a repaired, previously crash-damaged vehicle — a misrepresentation. ' +
+      'Rescission (money back) is the NORMAL remedy for misrepresentation and should be granted wherever ' +
+      '"practical justice" can be done; neither registration, depreciation, use nor delay barred it. ' +
+      'Misrepresentation Act 1967, s.2.',
+    whenToUse:
+      'When a seller’s false statement induced you to buy — you can aim for a full refund (rescission), ' +
+      'not merely a partial damages figure. The cleanest consumer "weave" of a statute + common law.',
+    source: 'https://swarb.co.uk/salt-v-stratstone-specialist-ltd-ca-16-jul-2015/',
+  },
+  {
+    id: 'parkingeye-beavis-2015',
+    name: 'ParkingEye Ltd v Beavis',
+    citation: '[2015] UKSC 67',
+    court: 'UK Supreme Court',
+    year: 2015,
+    outcome: 'The consumer LOST — but it is THE test for penalty + unfair-terms challenges.',
+    principle:
+      'The £85 overstay charge was held NOT an unenforceable penalty and NOT unfair. The modern test: ' +
+      'a term is penal only if it imposes a detriment "out of all proportion to any legitimate ' +
+      'interest" of the innocent party. Read the outcome honestly — cite it to argue a charge IS ' +
+      'disproportionate where the other side has no legitimate interest beyond punishing you.',
+    whenToUse:
+      'Challenging a fee/charge as an unenforceable penalty or an unfair term — this is the framework ' +
+      'a court will apply. Do not claim it as a consumer victory; it is the rulebook, and Beavis lost.',
+    source: 'https://www.bailii.org/uk/cases/UKSC/2015/67.html',
+  },
+];
+
+// Tier C — the LOSING uses, with real citations, so the tool can warn users off pseudo-law by name.
+export const LOSING_USES = [
+  {
+    id: 'samede-2012',
+    name: 'City of London v Samede (Occupy London)',
+    citation: '[2012] EWCA Civ 160',
+    court: 'Court of Appeal (Civil Division)',
+    year: 2012,
+    outcome: 'The pseudo-legal Magna Carta argument was rejected; the protestors lost.',
+    principle:
+      'A litigant’s claim to be exempt as a "Magna Carta heir", and that "constitutional and superior ' +
+      'law" beats statute, was "a concept unknown to the law" and "simply wrong — at least in a court ' +
+      'of law". The court confirmed only chapters 1, 9 and 29 of Magna Carta (1297) survive and that ' +
+      'chapter 29 "had no bearing" on the case.',
+    source: 'https://www.bailii.org/ew/cases/EWCA/Civ/2012/160.html',
+  },
+  {
+    id: 'kofa-2024',
+    name: 'R (Kofa) v Oldham MBC',
+    citation: '[2024] EWHC 685 (Admin)',
+    court: 'High Court (Administrative Court)',
+    year: 2024,
+    outcome: 'The "I did not consent to the statute" argument was rejected; permission for review refused.',
+    principle:
+      'The claim that council-tax law cannot bind an individual without personal consent fails: consent ' +
+      'is given democratically through elected representatives, not individually (Ashby v White / Holt ' +
+      'CJ). Taxing statutes "secure rather than undermine the rule of law". A current English authority ' +
+      'against the sovereign-citizen "no consent" theory.',
+    source: 'https://caselaw.nationalarchives.gov.uk/ewhc/admin/2024/685',
+  },
+  {
+    id: 'avi-mhvb-2020',
+    name: 'AVI v MHVB (Alberta — persuasive only)',
+    citation: '2020 ABQB 489',
+    court: 'Alberta Court of Queen’s Bench (Canada)',
+    year: 2020,
+    outcome: 'The Article 61 "lawful rebellion" argument was demolished on the merits.',
+    principle:
+      'Article 61 of the 1215 Magna Carta conferred no rights on individuals — it empowered only a ' +
+      'council of 25 barons, and it lapsed when King John died in 1216. The court called it an ' +
+      '"Organized Pseudolegal Commercial Argument" pretence "to get things for free, ignore the law… ' +
+      'and excuse criminal misconduct". Persuasive (not binding in England), but squarely on point.',
+    source: 'https://www.canlii.org/en/ab/abqb/doc/2020/2020abqb489/2020abqb489.html',
   },
 ];
 
@@ -108,21 +196,28 @@ export const STATUTORY_WEAVES = [
 // The honest guardrail note on Magna Carta — surfaced in the UI so no one repeats the losing move.
 export function magnaCartaReality() {
   return {
-    inForce: ['clause 1 (part)', 'clause 9 (City of London liberties)', 'clause 29 (1297) = 1215 clauses 39 + 40'],
+    instrument: 'Magna Carta (1297), 1297 c. 9 (25 Edw 1) — NOT the 1215 charter, which was annulled and is not statute',
+    inForce: ['chapter I (freedom of the Church)', 'chapter IX (City of London liberties)', 'chapter XXIX (due process / access to justice) = 1215 clauses 39 + 40'],
     theWinningUse:
-      'The constitutional right of access to justice (see R (UNISON) v Lord Chancellor [2017] UKSC 51). ' +
-      'That is Magna Carta’s living descendant and it has actually won in the Supreme Court.',
+      'The constitutional right of access to justice — Magna Carta’s living descendant — which has ' +
+      'actually won: Raymond v Honey [1983] 1 AC 1, and R (UNISON) v Lord Chancellor [2017] UKSC 51 ' +
+      'where the Supreme Court quashed tribunal fees, tracing the right to chapter 29.',
     theLosingUse:
       'Citing clause 61 ("lawful rebellion"), claiming you "do not consent to statute", or reciting the ' +
-      '1215 Latin as a defence. Clause 61 was stripped out within months in 1215 and is not law. Courts ' +
-      'reject this ("Freeman on the Land" / sovereign citizen) and it can get you penalised.',
-    source: 'https://commonslibrary.parliament.uk/magna-carta-does-it-still-matter/',
+      '1215 Latin as a defence. Real courts reject it and it can get you penalised — Samede [2012] ' +
+      'EWCA Civ 160 ("a concept unknown to the law"), Kofa [2024] EWHC 685 (Admin), AVI v MHVB 2020 ' +
+      'ABQB 489. A salon owner who tried clause 61 to dodge lockdown law was fined ~£17,000.',
+    source: 'https://www.legislation.gov.uk/aep/Edw1cc1929/25/9/section/XXIX',
   };
 }
 
 // Every entry, flattened, for search/verification. A citation with no source is a bug, not a case.
 export function allPrecedents() {
-  return [...ACCESS_TO_JUSTICE].map(c => ({ ...c, tier: 'access-to-justice' }));
+  return [
+    ...ACCESS_TO_JUSTICE.map(c => ({ ...c, tier: 'access-to-justice' })),
+    ...CONSUMER_CASES.map(c => ({ ...c, tier: 'consumer' })),
+    ...LOSING_USES.map(c => ({ ...c, tier: 'losing-use' })),
+  ];
 }
 
-export default { ACCESS_TO_JUSTICE, STATUTORY_WEAVES, magnaCartaReality, allPrecedents };
+export default { ACCESS_TO_JUSTICE, CONSUMER_CASES, LOSING_USES, STATUTORY_WEAVES, magnaCartaReality, allPrecedents };
