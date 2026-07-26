@@ -101,3 +101,87 @@ test('free-text is markup-stripped so a pasted grievance cannot inject into the 
   assert.ok(r.ok);
   assert.ok(!r.letter.includes('<script>'), 'angle brackets are neutralised');
 });
+
+// ── mutation-designed tests: pin the exact boundaries/branches the gate flips ──
+
+test('smallClaimsBand boundaries are inclusive at 0, 10000 and 25000', () => {
+  // n <= 0  (not n < 0): zero is "unknown", not small-claims
+  assert.equal(smallClaimsBand(0).band, 'unknown');
+  // n <= 10000 (not < 10000): exactly £10,000 stays in the small claims track
+  assert.equal(smallClaimsBand(10000).band, 'small-claims');
+  assert.equal(smallClaimsBand(10001).band, 'fast-track');
+  // n <= 25000 (not < 25000): exactly £25,000 is still fast-track
+  assert.equal(smallClaimsBand(25000).band, 'fast-track');
+  assert.equal(smallClaimsBand(25001).band, 'multi-track');
+});
+
+test('a numeric deadline date is used verbatim; a wordy one falls back to N days', () => {
+  // deadlineDate with a digit -> used as-is (pins `=== 'string' && /\d/`, and deadline `||`)
+  const withDate = assembleLBA({ ...BASE, claimType: 'goods_faulty', deadlineDate: '1 January 2027' });
+  assert.match(withDate.letter, /respond within 1 January 2027\./);
+  // deadlineDate with NO digit -> the `&&` guard rejects it and we fall back to "14 days"
+  const wordy = assembleLBA({ ...BASE, claimType: 'goods_faulty', deadlineDate: 'as soon as possible' });
+  assert.match(wordy.letter, /respond within 14 days\./);
+  assert.ok(!wordy.letter.includes('as soon as possible'));
+});
+
+test('esc maps < to ‹ and > to › (not swapped) and never drops the content', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'contract_breach', obligation: 'you would deliver', faultDesc: 'the gap was < 2mm and unacceptable' });
+  assert.ok(r.ok);
+  // == null guard: content is preserved, not blanked
+  assert.match(r.letter, /the gap was ‹ 2mm and unacceptable/);
+  // === '<' mapping: a lone '<' becomes '‹', never '›'
+  assert.ok(!r.letter.includes('›'));
+});
+
+test('header and signature use the supplied names, addresses and date verbatim', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'goods_faulty' });
+  assert.ok(r.letter.includes('15 March 2026'));                     // dateOfIssue ||
+  assert.ok(r.letter.includes('1 High St, Anytown, AN1 1AA'));       // yourAddress ||
+  assert.ok(r.letter.includes('MegaCorp Ltd'));                      // theirName ||
+  assert.ok(r.letter.includes('99 Corporate Rd, London, EC1 1AA'));  // theirAddress ||
+  // yourName appears in BOTH header and signature — pin both occurrences
+  assert.equal((r.letter.match(/Jane Smith/g) || []).length, 2);
+});
+
+test('goods letter names the actual item and requested remedy, not the defaults', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'goods_faulty', item: 'laptop', faultDesc: 'it overheats', remedy: 'a price reduction' });
+  assert.match(r.letter, /The laptop supplied/);              // item ||
+  assert.match(r.letter, /entitled to a price reduction and/);// remedy || (entitlement)
+  assert.match(r.letter, /require a price reduction of/);     // remedy || (requirement)
+  assert.match(r.letter, /If I do not receive a price reduction/); // remedy || (action)
+});
+
+test('service letter names the actual service and remedy', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'service_poor', item: 'boiler service', remedy: 'a refund', faultDesc: 'left it leaking' });
+  assert.match(r.letter, /The boiler service/);   // item ||
+  assert.match(r.letter, /I require a refund of/); // remedy ||
+});
+
+test('contract letter states the actual obligation and breach', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'contract_breach', obligation: 'you would install the fence by 1 May', faultDesc: 'no work was done' });
+  assert.match(r.letter, /contract under which you would install the fence by 1 May/); // obligation ||
+  assert.match(r.letter, /in breach because no work was done/);                        // faultDesc ||
+});
+
+test('distance-cancel letter uses the supplied cancellation date', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'distance_cancel', cancelDate: '3 April 2026' });
+  assert.match(r.letter, /I cancelled on 3 April 2026/); // cancelDate ||
+});
+
+test('data-breach letter states the actual misuse and required remedy', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'data_breach', faultDesc: 'you sold my email to advertisers', remedy: 'erase all my records', amount: 0 });
+  assert.match(r.letter, /in that you sold my email to advertisers/); // faultDesc || (in demand, not just THE FACTS)
+  assert.match(r.letter, /require you to erase all my records/);      // remedy ||
+});
+
+test('with no narrative override, THE FACTS uses the supplied event date and fault description', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'goods_faulty', eventDate: '2 February 2026', faultDesc: 'the screen cracked on first use' });
+  assert.match(r.letter, /On or about 2 February 2026, the screen cracked on first use\./); // eventDate || and faultDesc ||
+});
+
+test('a zero or missing amount renders as the [amount] placeholder, not £0.00', () => {
+  const r = assembleLBA({ ...BASE, claimType: 'goods_faulty', amount: 0, item: 'phone', remedy: 'a refund' });
+  assert.match(r.letter, /of \[amount\]\./); // money(): n === 0 -> placeholder
+  assert.ok(!r.letter.includes('£0.00'));
+});

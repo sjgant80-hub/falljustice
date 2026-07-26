@@ -92,3 +92,41 @@ test('escalation ladder only appears when overdue, and points to the ICO', () =>
 test('a bad received date is rejected', () => {
   assert.equal(deadlineTracker('not-a-date').ok, false);
 });
+
+// ── mutation-designed tests: pin the exact boundaries/branches the gate flips ──
+
+test('deadlineTracker status boundaries: 0 days is due-soon (not overdue), 3 days is due-soon', () => {
+  // daysRemaining < 0 (not <= 0): exactly on the due date is still "due-soon", not "overdue"
+  assert.equal(deadlineTracker('2026-03-15', { today: '2026-04-15' }).daysRemaining, 0);
+  assert.equal(deadlineTracker('2026-03-15', { today: '2026-04-15' }).status, 'due-soon');
+  // daysRemaining <= 3 (not < 3): exactly 3 days out is still "due-soon", not "on-track"
+  assert.equal(deadlineTracker('2026-03-15', { today: '2026-04-12' }).daysRemaining, 3);
+  assert.equal(deadlineTracker('2026-03-15', { today: '2026-04-12' }).status, 'due-soon');
+});
+
+test('the requested response format honours "by post" exactly', () => {
+  const post = buildDSAR({ ...BASE, format: 'by post' });
+  assert.match(post.letter, /Please provide the response by post\./); // format === 'by post'
+  const elec = buildDSAR({ ...BASE, format: 'electronically' });
+  assert.match(elec.letter, /Please provide the response electronically/); // default branch
+});
+
+test('esc maps < to ‹ and > to › (not swapped) and never drops the content', () => {
+  const r = buildDSAR({ ...BASE, specificData: 'files where value ‹placeholder› was < 100' });
+  assert.ok(r.ok);
+  // == null guard preserves the text; === '<' mapping turns a lone '<' into '‹'
+  assert.match(r.letter, /interested in: files where value ‹placeholder› was ‹ 100/);
+});
+
+test('the header, identity line and signature use the supplied details verbatim', () => {
+  const r = buildDSAR(BASE);
+  assert.ok(r.letter.includes('15 March 2026'));                    // dateOfIssue ||
+  assert.ok(r.letter.includes('1 High St, AN1 1AA'));               // yourAddress ||
+  // yourEmail || null: the email sits on its own header line right after the address
+  assert.match(r.letter, /1 High St, AN1 1AA\njane@example\.com/);
+  assert.ok(r.letter.includes('MegaCorp Ltd'));                     // controllerName ||
+  assert.ok(r.letter.includes('DPO, 99 Corporate Rd'));             // controllerAddress ||
+  assert.match(r.letter, /identify my records by: account 12345, jane@example\.com/); // identifiers ||
+  // yourName appears in BOTH header and signature — pin both occurrences
+  assert.equal((r.letter.match(/Jane Smith/g) || []).length, 2);
+});
