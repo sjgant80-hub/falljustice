@@ -1,0 +1,26 @@
+[
+  {
+    "line": 41,
+    "mutation": "|| → &&",
+    "snippet": "if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) ret",
+    "reason": "Equivalent, on the first comparison. This rejects a date that does not exist by checking whether the constructed date still reads back as the one that was asked for. Weakening the year test to require the month to have changed as well cannot alter any answer, because a year can only shift here by a month overflowing, and an overflowing month always lands in a different month too: asking for month 13 gives January of the following year, which is month 0, never month 12. There is no four-digit date for which the year differs and the month agrees. That 31 April, 30 February, 29 February in a common year, month 13 and month 0 are all refused is asserted in section 3."
+  },
+  {
+    "line": 41,
+    "mutation": "|| → &&",
+    "snippet": "if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) ret",
+    "reason": "Equivalent, on the second comparison. Requiring the day to have changed as well cannot alter any answer, because whenever the month rolls forward the day necessarily changes with it: a day past the end of a month lands on day (asked minus month-length), which equals the day asked for only if the month had no days at all. So month-differs always implies day-differs, and the two tests can never disagree. The same section 3 cases pin the behaviour."
+  },
+  {
+    "line": 99,
+    "mutation": "< → <=",
+    "snippet": "for (let guard = 0; guard < 30; guard++) {",
+    "reason": "Equivalent in every reachable case. This is the runaway guard on the walk to the next working day. The loop returns the moment it meets a day that is neither a weekend nor a supplied holiday, and no real calendar has thirty consecutive non-working days — the longest run the United Kingdom produces is the Christmas and New Year period, which is a handful. One extra permitted iteration therefore changes nothing, because the walk has already returned long before. The guard exists only so that a nonsense holiday list cannot spin forever, and that property holds either way. That the walk crosses a weekend and a holiday together is asserted in section 7."
+  },
+  {
+    "line": 113,
+    "mutation": "&& → ||",
+    "snippet": "const o = (opts && typeof opts === 'object') ? opts : {};",
+    "reason": "Equivalent. This normalises the options bag for dsarDeadline. The versions differ only for a value that is truthy but not an object — a string, a number, true, a function — which the original replaces with {} and the mutant keeps. Either way the properties read off it are today, extended and holidays, and none of those types carries any of them: today stays absent so there is no countdown, extended is not the literal true so no extension is granted, and holidays is not an array so it counts as none supplied. That an unusable options bag is ignored rather than fatal, and that a non-array holiday list counts as none rather than an empty one, are both asserted in section 8."
+  }
+]

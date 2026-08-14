@@ -1,3 +1,5 @@
+import { dsarDeadline, isOverdue } from './deadline.mjs';
+
 // ════════════════════════════════════════════════════════════════
 // falljustice · dsar.mjs — the Data Subject Access Request engine (UK GDPR Article 15)
 //
@@ -102,31 +104,31 @@ export function buildDSAR(facts = {}) {
 // Deterministic deadline math. received: ISO 'YYYY-MM-DD'. Returns the statutory due date (one
 // calendar month), the extended date (three months), and — given a reference date `today` — how many
 // days remain and the status. `today` is injectable so this is testable without a clock.
-export function deadlineTracker(received, { extended = false, today = null } = {}) {
-  const start = parseISO(received);
-  if (!start) return { ok: false, error: 'received date must be ISO YYYY-MM-DD' };
-
-  const due = addMonths(start, 1);
-  const extendedDue = addMonths(start, 3);
-  const target = extended ? extendedDue : due;
-
-  const ref = today ? parseISO(today) : null;
-  let daysRemaining = null, status = 'pending';
-  if (ref) {
-    daysRemaining = Math.round((target - ref) / 86400000);
-    status = daysRemaining < 0 ? 'overdue' : daysRemaining <= 3 ? 'due-soon' : 'on-track';
-  }
+export function deadlineTracker(received, { extended = false, today = null, holidays = null } = {}) {
+  // ⚑ THIS FILE USED TO STATE A RULE IT DID NOT APPLY. Every answer carried the sentence "if the due
+  // date is not a working day, the next working day applies (ICO guidance)" — and nothing computed
+  // it. A request received 7 Feb 2026 came back due Saturday 7 March, and on the Sunday this tracker
+  // reported the controller OVERDUE, two days early, with an escalation ladder pointing at the ICO.
+  const r = dsarDeadline(received, { extended, today, holidays });
+  if (!r.ok) return { ok: false, error: r.error };
 
   return {
     ok: true,
-    received: toISO(start),
-    dueDate: toISO(due),
-    extendedDueDate: toISO(extendedDue),
-    daysRemaining,
-    status,
+    received: r.received,
+    dueDate: r.dueDate,
+    statutoryDate: r.statutoryDate,
+    movedForWorkingDay: r.movedForWorkingDay,
+    extendedDueDate: dsarDeadline(received, { extended: true, holidays }).dueDate,
+    daysRemaining: r.daysRemaining,
+    status: r.status,
+    // ⚑ The verdict that sends somebody to the regulator is kept separate, and refuses to be
+    // certain when the deadline itself could still move.
+    overdue: isOverdue(r),
+    bankHolidaysApplied: r.bankHolidaysApplied,
     note: 'One calendar month from receipt. If the corresponding date does not exist in the next ' +
       'month, the last day of that month applies; if the due date is not a working day, the next ' +
-      'working day applies (ICO guidance). Complex requests may be extended to three months with notice.',
+      'working day applies (ICO guidance). Complex requests may be extended to three months with ' +
+      'notice. ' + r.caveat,
   };
 }
 

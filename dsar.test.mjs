@@ -64,9 +64,18 @@ test('deadlineTracker computes one calendar month from receipt', () => {
   assert.equal(t.extendedDueDate, '2026-06-15');
 });
 
-test('deadlineTracker clamps for short months (31 Jan -> 28 Feb)', () => {
+test('deadlineTracker clamps for short months, then moves off a non-working day', () => {
+  // ⚑ This expectation CHANGED, and deliberately. It used to assert dueDate === '2026-02-28', which
+  // was the clamped statutory date — and 28 February 2026 is a Saturday. Every answer this file
+  // produced carried the sentence "if the due date is not a working day, the next working day
+  // applies (ICO guidance)", and nothing computed it. The old expectation was pinning half a rule.
+  //
+  // Both halves are now asserted: the clamp still lands on 28 February, and the deadline a person
+  // should actually work to is the Monday.
   const t = deadlineTracker('2026-01-31');
-  assert.equal(t.dueDate, '2026-02-28');
+  assert.equal(t.statutoryDate, '2026-02-28');   // 31 Jan + 1 month, clamped — not 3 March
+  assert.equal(t.dueDate, '2026-03-02');         // ...and moved off the Saturday
+  assert.equal(t.movedForWorkingDay, true);
 });
 
 test('deadlineTracker status reflects the injected today', () => {

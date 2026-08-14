@@ -10,4 +10,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - run: npm test
+
+      - name: proof-of-play — the date somebody loses a right on
+        run: node deadline.test.mjs
+
+      # ⚑ Pinned. An unpinned gate is a gate somebody else can change.
+      - name: witness — try to break the deadline tests
+        run: |
+          git clone --depth 1 --branch v0.2 https://github.com/sjgant80-hub/witness.git /tmp/witness
+          node /tmp/witness/witness.mjs mutate deadline.mjs \
+            --cap 400 --baseline witness.deadline.baseline.json --test "node deadline.test.mjs"
+
+      # ⚑ The rule this tool prints in every answer must stay in the code, not just the prose.
+      - name: the working-day rule is computed, not merely claimed
+        run: |
+          grep -q 'nextWorkingDay' deadline.mjs || { echo '::error::the working-day rule is gone'; exit 1; }
+          grep -q 'dsarDeadline' dsar.mjs || { echo '::error::dsar.mjs is no longer using the gated kernel'; exit 1; }
+          node -e "
+            const {deadlineTracker} = await import('./dsar.mjs');
+            const r = deadlineTracker('2026-02-07');
+            if (r.dueDate !== '2026-03-09') { console.error('::error::a Saturday deadline is not being moved: ' + r.dueDate); process.exit(1); }
+            console.log('ok · 7 Feb 2026 -> ' + r.dueDate + ' (moved from ' + r.statutoryDate + ')');
+          " --input-type=module
