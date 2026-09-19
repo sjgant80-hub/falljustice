@@ -44,6 +44,5 @@ CI runs `npm test` on every push. `lba.mjs` and `evidence.mjs` are the importabl
 surface); `index.html` is the browser canvas.
 
 ## Seam
-Consumer-facing. Plain-English legal help + honest scope only. Do NOT introduce the private cosmology
-(no elements, dyad numbers, "the Thirteen"). Do NOT reintroduce solicitor/SRA framing — that belongs
+Consumer-facing. Plain-English legal help + honest scope only. Do NOT introduce the project's private internal taxonomy or notation. Do NOT reintroduce solicitor/SRA framing — that belongs
 to `falllegal`, not here.
