@@ -37,3 +37,16 @@ Open `index.html` in a modern browser (Chrome/Edge 113+). Set a master seed, dra
 your evidence bundle, export an encrypted backup.
 
 `lba.mjs` and `evidence.mjs` are the importable engine (SDK surface). Zero dependencies.
+
+### Check the law a letter cites (`cite.mjs`)
+
+`checkLetter(text)` reads every law a letter cites (Acts and their sections, Regulations, UK GDPR articles, case
+citations such as `[2015] UKSC 67`), in the ways people write them (`s.9`, `section 9 of the …`, `CRA 2015 s.9`), and
+says for each whether it is in the table a person verified for this engine: the claim types, the statutory weaves and
+the precedents. It **vouches only for those**. Anything else is "not in the verified table", which is not the same as
+false: the table is small on purpose. A wrong year is named ("the verified table has this instrument as Consumer
+Rights Act 2015"). Pseudo-law is flagged by the same guardrail the letter engine uses. Not legal advice. No language
+model is the source of anything it vouches for.
+
+`cite.mjs` and the pseudo-law guardrail in `lba.mjs` are mutation-gated in CI (witness v0.6, must be CLEAN, nothing
+excused). It is also a member of Kar's Swarm: https://sjgant80-hub.github.io/kar-swarm/

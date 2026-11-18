@@ -23,6 +23,17 @@ jobs:
           node /tmp/witness/witness.mjs mutate deadline.mjs \
             --cap 400 --baseline witness.deadline.baseline.json --test "node deadline.test.mjs"
 
+      # ⚑ The law layer is gated too: the letter engine's pseudo-law guardrail (lba.mjs) and the citation
+      # checker (cite.mjs), which vouches only for the hand-verified table. Both must be CLEAN, nothing excused.
+      - name: witness v0.6 — lba.mjs and cite.mjs must be CLEAN
+        run: |
+          git clone --depth 1 --branch v0.6 https://github.com/sjgant80-hub/witness.git /tmp/witness6
+          for k in lba:lba.test.mjs cite:cite.test.mjs; do
+            f=${k%%:*}.mjs; t=${k##*:}
+            node /tmp/witness6/witness.mjs mutate $f --cap 100000 --timeout 60000 --test node --test $t | tee $f.gate.out
+            node -e "const b=require('fs').readFileSync('$f.gate.out','utf8');const j=JSON.parse(b.slice(b.indexOf('{'),b.lastIndexOf('}')+1));if(j.clean!==true||j.capped!==false||j.ignored.length){console.error('GATE NOT CLEAN: $f');process.exit(1)}console.log('CLEAN '+j.killed+'/'+j.total+' — $f')"
+          done
+
       # ⚑ The rule this tool prints in every answer must stay in the code, not just the prose.
       - name: the working-day rule is computed, not merely claimed
         run: |
